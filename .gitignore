@@ -4,3 +4,4 @@ mvn*
 mvnw.cmd
 redis.iml
 target/
+.DS_Store
