@@ -54,6 +54,13 @@
       <artifactId>reactor-test</artifactId>
       <scope>test</scope>
     </dependency>
+
+    <dependency>
+      <groupId>com.gft</groupId>
+      <artifactId>lib-abstract-component-wrap-data-system</artifactId>
+      <version>0.0.3-SNAPSHOT</version>
+    </dependency>
+
   </dependencies>
 
   <dependencyManagement>

@@ -1,14 +1,12 @@
-package com.milfist.cache.redis;
+package com.milfist.cache.redis.domain;
 
 import lombok.*;
 
 import java.io.Serializable;
 
 @Data
-@ToString
 @AllArgsConstructor
 @NoArgsConstructor
-@EqualsAndHashCode
 public class Person implements Serializable {
 
   private String firstName;

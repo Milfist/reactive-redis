@@ -1,79 +1,41 @@
 package com.milfist.cache.redis.configuration;
 
-import com.milfist.cache.redis.Person;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.data.redis.connection.ReactiveKeyCommands;
+import org.springframework.context.annotation.Primary;
+import org.springframework.core.annotation.Order;
 import org.springframework.data.redis.connection.ReactiveRedisConnectionFactory;
-import org.springframework.data.redis.connection.ReactiveStringCommands;
-import org.springframework.data.redis.connection.RedisConnectionFactory;
+import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
-import org.springframework.data.redis.core.ReactiveRedisTemplate;
-import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
-import org.springframework.data.redis.serializer.RedisSerializationContext;
-import org.springframework.data.redis.serializer.StringRedisSerializer;
 
-import javax.annotation.PreDestroy;
-
+@Slf4j
 @Configuration
+@Order(1)
 public class CacheConfiguration {
 
-  @Autowired
-  private RedisConnectionFactory factory;
+  @Value("${spring.redis.host}")
+  private String host;
 
-//  private ReactiveRedisConnectionFactory factory;
-//
-//  @Value("${spring.redis.host:localhost}")
-//  private String host;
-//
-//  @Value("${spring.redis.port:6379}")
-//  private Integer port;
-//
-//  @Bean("factory")
-//  public ReactiveRedisConnectionFactory reactiveRedisConnectionFactory() {
-//    factory = new LettuceConnectionFactory(host, port);
-//    return factory;
-//  }
+  @Value("${spring.redis.port}")
+  private Integer port;
 
-//  @Bean
-//  public LettuceConnectionFactory redisConnectionFactory() {
-//    return new LettuceConnectionFactory();
-//  }
+  @Value("${spring.redis.password}")
+  private String password;
 
-  @Bean
-  public ReactiveRedisTemplate<String, String> reactiveRedisTemplateString (ReactiveRedisConnectionFactory factory) {
-    return new ReactiveRedisTemplate<>(factory, RedisSerializationContext.string());
-  }
+  @Primary
+  @Bean("connectionFactory")
+  public ReactiveRedisConnectionFactory reactiveRedisConnectionFactory() {
 
-  @Bean
-  public ReactiveRedisTemplate<String, Person> reactiveJsonPersonRedisTemplate(
-      ReactiveRedisConnectionFactory factory) {
+    log.info("Cloud Config Redis");
+    log.info("REDIS HOST:" + host);
+    log.info("REDIS PORT:" + port);
+    log.info("REDIS PASS:" + password);
 
-    Jackson2JsonRedisSerializer<Person> serializer = new Jackson2JsonRedisSerializer<>(Person.class);
-    RedisSerializationContext.RedisSerializationContextBuilder<String, Person> builder = RedisSerializationContext
-        .newSerializationContext(new StringRedisSerializer());
+    RedisStandaloneConfiguration configuration = new RedisStandaloneConfiguration(host, port);
+    configuration.setPassword(password);
 
-    RedisSerializationContext<String, Person> serializationContext = builder.value(serializer).build();
-
-    return new ReactiveRedisTemplate<>(factory, serializationContext);
-  }
-
-  @Bean
-  public ReactiveKeyCommands keyCommands(final ReactiveRedisConnectionFactory factory) {
-    return factory.getReactiveConnection()
-        .keyCommands();
-  }
-
-  @Bean
-  public ReactiveStringCommands stringCommands(final ReactiveRedisConnectionFactory factory) {
-    return factory.getReactiveConnection()
-        .stringCommands();
-  }
-
-  public @PreDestroy
-  void flushTestDb() {
-    factory.getConnection().flushDb();
+    return new LettuceConnectionFactory(configuration);
   }
 }
